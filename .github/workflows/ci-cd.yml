@@ -146,15 +146,24 @@ jobs:
           SAGRES_FRONTEND_URL: 'http://localhost:5173'
           SPRING_MAIL_HOST: localhost
           SPRING_MAIL_PORT: '1025'
+          SAGRES_CORS_ALLOWED_ORIGINS: 'http://localhost:5173'
         run: |
           nohup java -jar target/*.jar > app.log 2>&1 &
           echo "Aguardando a aplicação subir..."
+          READY=false
           for i in $(seq 1 30); do
-            curl -sf http://localhost:8080/actuator/health && break
-            curl -sf http://localhost:8080/ && break
+            if curl -sf http://localhost:8080/ > /dev/null 2>&1; then
+              READY=true
+              break
+            fi
             sleep 2
           done
+          echo "----- Log da aplicação -----"
           cat app.log
+          if [ "$READY" != "true" ]; then
+            echo "A aplicação não respondeu a tempo. Abortando o job."
+            exit 1
+          fi
 
       - name: Varredura dinâmica (OWASP ZAP Baseline)
         uses: zaproxy/action-baseline@v0.12.0
