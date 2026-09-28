@@ -70,12 +70,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Configurar Java 21
+        if: matrix.language == 'java'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
       - name: Inicializar CodeQL
         uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
 
-      - name: Autobuild
+      # O autobuild genérico do CodeQL só procura pom.xml/build.gradle na
+      # raiz do repositório, mas o nosso está em backend/. Por isso builda-
+      # mos o Java manualmente, apontando pra pasta certa.
+      - name: Build manual (Java)
+        if: matrix.language == 'java'
+        working-directory: backend
+        run: mvn -B clean compile -DskipTests
+
+      - name: Autobuild (JavaScript)
+        if: matrix.language == 'javascript'
         uses: github/codeql-action/autobuild@v3
 
       - name: Rodar análise
