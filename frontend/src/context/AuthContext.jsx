@@ -43,6 +43,7 @@ export function AuthProvider({ children }) {
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components -- padrão comum de Context + hook no mesmo arquivo; não afeta o funcionamento, só o hot-reload durante desenvolvimento
 export function useAuth() {
   const context = useContext(AuthContext)
   if (!context) throw new Error('useAuth deve ser usado dentro de AuthProvider')
