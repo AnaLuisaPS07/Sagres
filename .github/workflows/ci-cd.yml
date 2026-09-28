@@ -169,13 +169,13 @@ jobs:
           fi
 
       - name: Varredura dinâmica (OWASP ZAP Baseline)
-        uses: zaproxy/action-baseline@v0.12.0
-        with:
-          target: 'http://localhost:8080'
-          cmd_options: '-a'
-          fail_action: false
-          allow_issue_writing: false
-          artifact_name: 'zap-scan-${{ github.run_id }}-${{ github.run_attempt }}'
+        run: |
+          docker pull ghcr.io/zaproxy/zaproxy:stable
+          docker run --network=host -v "$(pwd)":/zap/wrk/:rw -t ghcr.io/zaproxy/zaproxy:stable \
+            zap-baseline.py -t http://localhost:8080 -a || true
+        # zap-baseline.py sai com código != 0 quando encontra alertas — isso é
+        # esperado (o scan em si funcionou); o "|| true" evita que isso quebre
+        # o job. O resultado completo (PASS/WARN/FAIL) aparece no log acima.
 
   # ──────────────────────────────────────────────
   # 5) Publica imagens no GHCR — ambiente STAGING
