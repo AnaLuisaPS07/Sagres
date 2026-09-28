@@ -2,22 +2,21 @@ package com.sagres.modulo_usuario.domain.vo;
 
 import com.sagres.shared.exception.DomainException;
 
-import java.util.List;
 import java.util.Objects;
 
 /**
  * Value Object imutável que representa um e-mail institucional da UFG.
  * <p>
- * Domínios aceitos: @discente.ufg.br (alunos) e @ufg.br (servidores/monitores).
+ * Domínios aceitos: @ufg.br e qualquer subdomínio institucional
+ * (ex.: @discente.ufg.br, @inf.ufg.br, @eee.ufg.br), já que alunos,
+ * professores e servidores de diferentes unidades usam domínios distintos.
  * Lança {@link DomainException} se o valor for inválido — falha rápida no domínio.
  * </p>
  */
 public final class EmailInstitucional {
 
-    private static final List<String> DOMINIOS_VALIDOS = List.of(
-            "@discente.ufg.br",
-            "@ufg.br"
-    );
+    private static final String SUFIXO_UFG = ".ufg.br";
+    private static final String DOMINIO_UFG_DIRETO = "@ufg.br";
 
     private final String valor;
 
@@ -33,12 +32,12 @@ public final class EmailInstitucional {
 
         String normalizado = valor.trim().toLowerCase();
 
-        boolean dominioValido = DOMINIOS_VALIDOS.stream()
-                .anyMatch(normalizado::endsWith);
+        boolean dominioValido = normalizado.endsWith(SUFIXO_UFG)
+                || normalizado.endsWith(DOMINIO_UFG_DIRETO);
 
         if (!dominioValido) {
             throw new DomainException(
-                    "E-mail inválido: apenas endereços @discente.ufg.br ou @ufg.br são aceitos."
+                    "E-mail inválido: apenas endereços institucionais @ufg.br são aceitos."
             );
         }
 
