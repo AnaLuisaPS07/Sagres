@@ -152,7 +152,10 @@ jobs:
           echo "Aguardando a aplicação subir..."
           READY=false
           for i in $(seq 1 30); do
-            if curl -sf http://localhost:8080/ > /dev/null 2>&1; then
+            CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/ || echo "000")
+            # Qualquer código HTTP de volta (mesmo 404) já prova que o Tomcat
+            # está de pé — a raiz "/" não tem rota mapeada, só /api/auth/**.
+            if [ "$CODE" != "000" ]; then
               READY=true
               break
             fi
